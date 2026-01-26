@@ -1,0 +1,35 @@
+{
+  "name": "obsidian-to-typst",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "format": "biome format --write",
+    "lint": "biome lint",
+    "check": "biome check"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@moritzrs/mdast-util-ofm-callout": "^0.0.1",
+    "@moritzrs/mdast-util-ofm-tag": "^0.0.1",
+    "@moritzrs/mdast-util-ofm-wikilink": "^0.0.1",
+    "@moritzrs/remark-ofm": "^0.0.1",
+    "cmd-ts": "^0.14.3",
+    "gray-matter": "^4.0.3",
+    "liquidjs": "^10.24.0",
+    "pdfjs-dist": "^5.4.54",
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-obsidian": "^1.10.0"
+  }
+}
