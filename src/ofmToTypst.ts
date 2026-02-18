@@ -25,27 +25,28 @@ async function obsidianStringToTypst(
   content: string,
   frontmatterTemplate?: Template[],
 ): Promise<string> {
+  // Extract frontmatter data
+  const { data: frontmatterData, content: contentWithoutFrontmatter } = matter(content);
+
   // Render frontmatter template if provided
-  let renderedFrontmatterTemplate: string | null = null;
+  let renderedFrontmatterTemplate = "";
   if (frontmatterTemplate) {
-    // Extract frontmatter data
-    const { data: frontmatterData } = matter(content);
     renderedFrontmatterTemplate = await liquidEngine.render(
       frontmatterTemplate,
       frontmatterData,
     );
+    renderedFrontmatterTemplate += "\n"
   }
 
-  const root = remark().use(remarkGfm).use(remarkOfm).parse(content);
+  const root = remark().use(remarkGfm).use(remarkOfm).parse(contentWithoutFrontmatter);
 
   if (root.type !== "root") {
     throw "unexpected";
   }
 
   const state: NodeToTypstStringState = {
-    acc: "",
+    acc: renderedFrontmatterTemplate,
     obsidianVault,
-    renderedFrontmatterTemplate,
   };
   await nodeToTypstString(root, state);
   return state.acc;
@@ -53,33 +54,14 @@ async function obsidianStringToTypst(
 
 type NodeToTypstStringState = {
   acc: string;
-  insideFrontmatter?: boolean;
   insideList?: "ordered" | "unordered";
   obsidianVault: ObsidianVault;
-  renderedFrontmatterTemplate?: string | null;
 };
 
 async function nodeToTypstString(
   node: RootContent | Root,
   state: NodeToTypstStringState,
 ) {
-  if (node.type === "thematicBreak") {
-    const wasInsideFrontmatter = state.insideFrontmatter;
-    state.insideFrontmatter = !state.insideFrontmatter;
-
-    // If we're exiting frontmatter and have a rendered frontmatter template, insert it
-    if (wasInsideFrontmatter && state.renderedFrontmatterTemplate) {
-      state.acc += state.renderedFrontmatterTemplate;
-      state.acc += "\n";
-    }
-    return;
-  }
-
-  if (state.insideFrontmatter) {
-    // Ignore frontmatter content (we've already extracted it)
-    return;
-  }
-
   switch (node.type) {
     case "root":
     case "paragraph": {
@@ -90,7 +72,7 @@ async function nodeToTypstString(
       break;
     }
     case "text": {
-      state.acc += node.value;
+      state.acc += node.value.replaceAll("$", "\\$");
       break;
     }
     case "link": {
@@ -241,7 +223,8 @@ async function nodeToTypstString(
       } else if ([".png", ".jpg", ".jpeg", ".gif", ".svg"].includes(ext)) {
         state.acc += `#image("${url}")`;
       } else {
-        throw `unimplemented: embed extension: ${ext}`;
+        console.error(`warning: ignoring unimplemented: embed extension: ${ext}`);
+        break;
       }
       break;
     }

@@ -121,5 +121,5 @@ async function getNoteTitle(
     // Render the title template with the note's frontmatter data
     return liquidEngine.render(titleTemplate, note.frontmatterData);
   }
-  return path.basename(note.path, ".md");
+  return path.basename(note.path, ".md").replaceAll("$", "\\$");
 }

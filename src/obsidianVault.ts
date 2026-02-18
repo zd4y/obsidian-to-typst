@@ -34,7 +34,10 @@ export class ObsidianVault {
     obsidianUrl: string,
     { absolute }: { absolute: boolean } = { absolute: false },
   ): string {
-    const absolutePath = path.join(this.attachmentsPath, obsidianUrl);
+    let absolutePath = path.join(this.attachmentsPath, obsidianUrl);
+    if (obsidianUrl.includes("/")) {
+      absolutePath = path.join(this.vaultPath, obsidianUrl);
+    }
     if (absolute) {
       return absolutePath;
     }
